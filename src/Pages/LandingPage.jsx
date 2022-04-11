@@ -8,7 +8,8 @@ import { CreateModal } from '../Components/CreateModal'
 class LandingPage extends React.Component{
     state = {
         modalOpen: false,
-        data: null
+        data: null,
+        previewImage: null
     }
     
     componentDidMount(){
@@ -27,6 +28,28 @@ class LandingPage extends React.Component{
         newData[index].mainImage = val
         
         this.setState({data: newData})
+    }
+
+    onImagesValidation = (e) => {
+        try {
+            let files = [...e.target.files]
+
+            if(files.length > 1) throw { message: 'Select 1 Images Only!' }
+
+            files.forEach((value) => {
+                if(value.size > 20000) throw { message: `${value.name} More Than 20Kb` }
+            })
+
+            const reader = new FileReader()
+            reader.readAsDataURL(files[0])
+            reader.onload = () => {
+                if(reader.readyState === 2){
+                    this.setState({previewImage: reader.result})
+                }
+            }
+        } catch (error) {
+            this.setState({errorMessage: error.message})
+        }
     }
 
     render(){
@@ -102,12 +125,13 @@ class LandingPage extends React.Component{
                         <div className="px-3">
                             <div className="row justify-content-center">
                                 <div className="col-12 d-flex justify-content-center align-items-center border border-primary" style={{width: this.state.previewImage? '100%':null, height: this.state.previewImage? '100%':'100px'}}>
-                                    Image Preview
+                                    {
+                                        this.state.previewImage? <img src={this.state.previewImage} alt='Image Preview' width='50%' /> : 'Image Preview'
+                                    }
                                 </div>
                                 <div className="col-6 mt-3">
                                     <div>
-                                        <input type="file" accept="image/*" ref={e => this.files = e} style={{display: 'none'}} />
-                                        <input type="button" value="Choose File" onClick={() => this.files.click()} className="btn btn-warning" />
+                                        <input type="file" accept="image/*" multiple onChange={(e) => this.onImagesValidation(e)} />
                                     </div>
                                 </div>
                                 <div className="col-6 mt-3 d-flex align-items-center">
