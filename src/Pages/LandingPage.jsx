@@ -3,24 +3,23 @@ import {Modal, ModalBody} from 'reactstrap'
 import axios from 'axios'
 
 // Import CreateModal
-import { CreateModal } from '../Components/CreateModal'
+import CreateModal  from '../Components/CreateModal'
+
+import LandingPageSkeleton from '../SkeletonLoading/LandingPageSkeleton'
+
+// Import ProductAction
+import { connect } from 'react-redux'
+import {getAllProducts} from './../Redux/Actions/ProductAction';
 
 class LandingPage extends React.Component{
     state = {
         modalOpen: false,
         data: null,
-        previewImage: null
+        previewImage: null,
     }
     
     componentDidMount(){
-        axios.get('http://localhost:5000/upload/getproduct')
-        .then((res) =>{
-            
-            this.setState({data: res.data.data})
-        })
-        .catch((err) => {
-            console.log(err)
-        })
+        this.props.getAllProducts()
     }
 
     onSwitchImage = (index, val, idx) => {
@@ -73,8 +72,8 @@ class LandingPage extends React.Component{
                     {/* Card Layout */}
                     <div className ='row'>
                         {
-                            this.state.data?
-                                this.state.data.map((value, index) => {
+                            this.props.products.data?
+                                this.props.products.data.map((value, index) => {
                                     return(
                                         <div className='col-4'>
                                             {/* Card Content */}
@@ -114,8 +113,8 @@ class LandingPage extends React.Component{
                                         </div>
                                     )
                                 })
-                            :
-                                'Loading'
+                            :   
+                                <LandingPageSkeleton />
                         }
                     </div>
                 </div>
@@ -152,4 +151,14 @@ class LandingPage extends React.Component{
     }
 }
 
-export default LandingPage
+const mapDispatchToProps = {
+    getAllProducts
+}
+
+const mapStateToProps = (state) => {
+    return{
+        products: state.products
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LandingPage)

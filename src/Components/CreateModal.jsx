@@ -2,7 +2,10 @@ import Axios from 'axios'
 import React, { Component } from 'react'
 import {Modal, ModalBody} from 'reactstrap'
 
-export class CreateModal extends Component{
+import { connect } from 'react-redux'
+import { insertProduct } from '../Redux/Actions/ProductAction'
+
+class CreateModal extends Component{
 
     state = {
         modalOpen: false,
@@ -27,44 +30,50 @@ export class CreateModal extends Component{
     }
 
     onSubmitData = () => {
-        let name = this.name.value 
-        let price = this.price.value 
-        let description = this.description.value 
-        let weight = this.weight.value 
-        let stock = this.stock.value 
-
-        try {
-            if(!name || !price || !description || !weight || !stock) throw { message: 'Data Not Completed! Fill All Data!' }
-
-            let data = {
-                name, 
-                price,
-                description, 
-                weight, 
-                stock
-            }
-
-            let dataToSend = JSON.stringify(data)
-
-            let fd = new FormData()
-            fd.append('data', dataToSend)
-
-            this.state.images.forEach((value) => {
-                fd.append('images', value)
-            })
-
-            console.log(fd)
-
-            Axios.post('http://localhost:5000/upload/newproduct', fd)
-            .then((res) => {
-                alert('Upload Product Success!')
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-        } catch (error) {
-            this.setState({errorMessage: error.message})
+        let data = {
+            name: this.name.value,
+            price: this.price.value,
+            description: this.description.value,
+            weight: this.weight.value,
+            stock: this.stock.value
         }
+
+        let images = this.state.images
+
+        this.props.insertProduct(data, images)
+
+        // try {
+        //     if(!name || !price || !description || !weight || !stock) throw { message: 'Data Not Completed! Fill All Data!' }
+
+        //     let data = {
+        //         name, 
+        //         price,
+        //         description, 
+        //         weight, 
+        //         stock
+        //     }
+
+        //     let dataToSend = JSON.stringify(data)
+
+        //     let fd = new FormData()
+        //     fd.append('data', dataToSend)
+
+        //     this.state.images.forEach((value) => {
+        //         fd.append('images', value)
+        //     })
+
+        //     console.log(fd)
+
+        //     Axios.post('http://localhost:5000/upload/newproduct', fd)
+        //     .then((res) => {
+        //         alert('Upload Product Success!')
+        //     })
+        //     .catch((err) => {
+        //         console.log(err)
+        //     })
+        // } catch (error) {
+        //     this.setState({errorMessage: error.message})
+        // }
     }
 
     render(){
@@ -110,10 +119,10 @@ export class CreateModal extends Component{
                             </div>
                         </div>
                         <div className="px-3">
-                            <h6>
+                            <h6 className={this.props.products.error? 'text-warning' : 'text-success'}>
                                {
-                                   this.state.errorMessage?
-                                        this.state.errorMessage
+                                   this.props.products.insertMessage?
+                                        this.props.products.insertMessage
                                     :
                                         null
                                }
@@ -128,3 +137,15 @@ export class CreateModal extends Component{
         )
     }
 }
+
+const mapDispatchToProps = {
+    insertProduct
+}
+
+const mapStateToProps = (state) => {
+    return{
+        products: state.products
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CreateModal)
